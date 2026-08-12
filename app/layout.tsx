@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Jersey_20 } from "next/font/google";
 import "./globals.css";
 import Sidebar from "./components/sidebar";
+
+const jersey = Jersey_20({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-jersey",
+});
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,7 +28,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${jersey.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-row">
         <Sidebar />
