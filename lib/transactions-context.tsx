@@ -20,7 +20,7 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
   // Seeded with the mock data so existing pages keep working as before;
   // everything added after this just lives in memory on top of it.
   const [transactions, setTransactions] =
-    useState<Transaction[]>(mockTransactions);
+    useState<Transaction[]>([]);
 
   const addTransaction = (transaction: NewTransaction) => {
     const withId: Transaction = { ...transaction, id: crypto.randomUUID() };

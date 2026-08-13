@@ -1,9 +1,15 @@
 "use client";
+import type { Transaction } from "@/lib/mock-data";
 
-import { useTransactions } from "@/lib/transactions-context";
-
+import { useEffect, useState } from "react";
 const Transactions = () => {
-  const { transactions } = useTransactions();
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  useEffect(() => {
+    fetch('/api/transactions')
+    .then((res) =>res.json())
+    .then((data) => setTransactions(data))
+  }, []);
+
 
   return (
     <div className="p-6">
