@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { href: "/budgets", label: "Budgets" },
   { href: "/reports", label: "Reports" },
   { href: "/settings", label: "Settings" },
+  { href: "/inputs", label: "Inputs" }
 ];
 
 const SECONDARY_NAV_ITEMS = [

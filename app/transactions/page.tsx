@@ -1,12 +1,16 @@
-import { mockTransactions } from "@/lib/mock-data";
+"use client";
+
+import { useTransactions } from "@/lib/transactions-context";
 
 const Transactions = () => {
+  const { transactions } = useTransactions();
+
   return (
     <div className="p-6">
       <h1 className="mb-4 text-4xl font-display">Transactions</h1>
 
       <div className="flex flex-col gap-2">
-        {mockTransactions.map((transaction) => (
+        {transactions.map((transaction) => (
           <div
             key={transaction.id}
             className="flex items-center justify-between rounded-lg border border-zinc-200 px-4 py-3 dark:border-zinc-800"
