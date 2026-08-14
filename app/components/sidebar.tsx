@@ -1,7 +1,8 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
 
 const NAV_ITEMS = [
   { href: "/", label: "Dashboard" },
@@ -12,13 +13,25 @@ const NAV_ITEMS = [
   { href: "/inputs", label: "Inputs" }
 ];
 
-const SECONDARY_NAV_ITEMS = [
-  { href: "/help", label: "Help" },
-  { href: "/logout", label: "Log out" },
-];
+const SECONDARY_NAV_ITEMS = [{ href: "/help", label: "Help" }];
+
+// Shared classes so the logout button visually matches the nav links,
+// even though it's a <button> (an action) rather than a <Link> (a route).
+const secondaryItemClassName =
+  "rounded-md px-3 py-2 text-left text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-200 dark:text-zinc-400 dark:hover:bg-zinc-900";
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { data: session, isPending } = authClient.useSession();
+
+  const handleLogout = async () => {
+    await authClient.signOut({
+      fetchOptions: {
+        onSuccess: () => router.push("/login"),
+      },
+    });
+  };
 
   const isItemActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -51,6 +64,17 @@ export default function Sidebar() {
 
       <nav className="mt-auto flex flex-col gap-1 border-t border-zinc-200 pt-3 dark:border-zinc-800">
         {SECONDARY_NAV_ITEMS.map(renderLink)}
+
+        {/* While the session is still loading, show neither — avoids a
+            flash of "Login" before we actually know you're logged in. */}
+        {!isPending &&
+          (session ? (
+            <button onClick={handleLogout} className={secondaryItemClassName}>
+              Log out
+            </button>
+          ) : (
+            renderLink({ href: "/login", label: "Login" })
+          ))}
       </nav>
     </aside>
   );

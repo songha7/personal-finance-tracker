@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Jersey_20 } from "next/font/google";
 import "./globals.css";
 import Sidebar from "./components/sidebar";
-import { TransactionsProvider } from "@/lib/transactions-context";
 
 const jersey = Jersey_20({
   subsets: ["latin"],
@@ -33,9 +32,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-row">
         <Sidebar />
-        <TransactionsProvider>
-          <div className="flex flex-1 flex-col">{children}</div>
-        </TransactionsProvider>
+        <div className="flex flex-1 flex-col">{children}</div>
       </body>
     </html>
   );

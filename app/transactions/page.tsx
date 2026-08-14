@@ -2,13 +2,23 @@
 import type { Transaction } from "@/lib/mock-data";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 const Transactions = () => {
+  const router = useRouter();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   useEffect(() => {
     fetch('/api/transactions')
-    .then((res) =>res.json())
-    .then((data) => setTransactions(data))
-  }, []);
+    .then((res) => {
+      if (res.status === 401) {
+        router.push('/login');
+        return null;
+      }
+      return res.json();
+    })
+    .then((data) => {
+      if (data) setTransactions(data);
+    })
+  }, [router]);
 
 
   return (

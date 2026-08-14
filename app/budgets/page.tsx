@@ -1,23 +1,43 @@
 "use client";
 
-import { useState } from "react";
-import { mockTransactions, mockCategoryBudgets } from "@/lib/mock-data";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { mockCategoryBudgets, type Transaction } from "@/lib/mock-data";
 
 const DEFAULT_LIMIT = 1000;
 
-function spentOnCategory(category: string) {
-  return mockTransactions
+function spentOnCategory(transactions: Transaction[], category: string) {
+  return transactions
     .filter((t) => t.type === "expense" && t.category === category)
     .reduce((total, t) => total + t.amount, 0);
 }
 
 const Budgets = () => {
+  const router = useRouter();
+
+  // --- The logged-in user's real transactions, fetched from the DB ---
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+
+  useEffect(() => {
+    fetch("/api/transactions")
+      .then((res) => {
+        if (res.status === 401) {
+          router.push("/login");
+          return null;
+        }
+        return res.json();
+      })
+      .then((data) => {
+        if (data) setTransactions(data);
+      });
+  }, [router]);
+
   // --- Overall monthly limit (editable) ---
   const [limit, setLimit] = useState(DEFAULT_LIMIT);
   const [isEditing, setIsEditing] = useState(false);
   const [draftLimit, setDraftLimit] = useState(String(DEFAULT_LIMIT));
 
-  const spent = mockTransactions
+  const spent = transactions
     .filter((t) => t.type === "expense")
     .reduce((total, t) => total + t.amount, 0);
 
@@ -35,7 +55,7 @@ const Budgets = () => {
   };
 
   // --- Derived data for the analytics + in/out panels ---
-  const totalIncome = mockTransactions
+  const totalIncome = transactions
     .filter((t) => t.type === "income")
     .reduce((total, t) => total + t.amount, 0);
 
@@ -43,14 +63,12 @@ const Budgets = () => {
 
   const expenseCategories = Array.from(
     new Set(
-      mockTransactions
-        .filter((t) => t.type === "expense")
-        .map((t) => t.category)
+      transactions.filter((t) => t.type === "expense").map((t) => t.category)
     )
   );
   const categorySpend = expenseCategories.map((category) => ({
     category,
-    amount: spentOnCategory(category),
+    amount: spentOnCategory(transactions, category),
   }));
   const maxCategorySpend = Math.max(...categorySpend.map((c) => c.amount), 1);
 
@@ -113,7 +131,7 @@ const Budgets = () => {
 
         {/* 2, 6, 3, 7: per-category mini cards — one grid cell each */}
         {mockCategoryBudgets.map(({ category, limit: categoryLimit }) => {
-          const categorySpent = spentOnCategory(category);
+          const categorySpent = spentOnCategory(transactions, category);
           const over = categorySpent > categoryLimit;
           return (
             <div

@@ -2,36 +2,60 @@
 
 import { useState, type SubmitEvent } from "react";
 import { useRouter } from "next/navigation";
-import { useTransactions } from "@/lib/transactions-context";
+import { mockCategoryBudgets } from "@/lib/mock-data";
 
 const Inputs = () => {
-  const { addTransaction } = useTransactions();
   const router = useRouter();
 
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState(mockCategoryBudgets[0].category);
   const [type, setType] = useState<"income" | "expense">("expense");
   const [amount, setAmount] = useState("");
+  // Defaults to today, but is now a real editable field like every other
+  // column on the Transaction table — not silently hardcoded anymore.
+  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: SubmitEvent) => {
+  const handleSubmit = async (e: SubmitEvent) => {
     e.preventDefault();
+    setError(null);
 
     const parsedAmount = Number(amount);
     const isValid =
       description.trim() &&
       category.trim() &&
+      date.trim() &&
       Number.isFinite(parsedAmount) &&
       parsedAmount > 0;
 
     if (!isValid) return; // simple guard, no error UI yet
 
-    addTransaction({
-      description,
-      category,
-      type,
-      amount: parsedAmount,
-      date: new Date().toISOString().slice(0, 10), // "YYYY-MM-DD"
+    setIsSubmitting(true);
+
+    const response = await fetch("/api/transactions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        description,
+        category,
+        type,
+        amount: parsedAmount,
+        date,
+      }),
     });
+
+    setIsSubmitting(false);
+
+    if (response.status === 401) {
+      router.push("/login");
+      return;
+    }
+
+    if (!response.ok) {
+      setError("Couldn't save that transaction. Try again.");
+      return;
+    }
 
     router.push("/transactions");
   };
@@ -52,19 +76,30 @@ const Inputs = () => {
           className="rounded-md border border-zinc-300 px-3 py-2 text-sm"
         />
 
-        <input
-          type="text"
-          placeholder="Category"
+        <select
           value={category}
           onChange={(e) => setCategory(e.target.value)}
           className="rounded-md border border-zinc-300 px-3 py-2 text-sm"
-        />
+        >
+          {mockCategoryBudgets.map(({ category: name }) => (
+            <option key={name} value={name}>
+              {name}
+            </option>
+          ))}
+        </select>
 
         <input
           type="number"
           placeholder="Amount"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
+          className="rounded-md border border-zinc-300 px-3 py-2 text-sm"
+        />
+
+        <input
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
           className="rounded-md border border-zinc-300 px-3 py-2 text-sm"
         />
 
@@ -87,11 +122,14 @@ const Inputs = () => {
           </label>
         </div>
 
+        {error && <p className="text-sm text-red-500">{error}</p>}
+
         <button
           type="submit"
-          className="mt-2 rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-white"
+          disabled={isSubmitting}
+          className="mt-2 rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
         >
-          Save transaction
+          {isSubmitting ? "Saving..." : "Save transaction"}
         </button>
       </form>
     </div>

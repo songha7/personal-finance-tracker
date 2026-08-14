@@ -1,12 +1,16 @@
-const user = "Asuna";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 
-export default function Home() {
+export default async function Home() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
   return (
     <div className="flex flex-1 flex-col p-6">
       <div>
         <span className="font-display text-9xl">
-          Hello {user}!
+          Hello {session?.user.name}!
         </span>
       </div>
 
