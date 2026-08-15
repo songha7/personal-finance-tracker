@@ -30,11 +30,5 @@
     "tailwindcss": "^4",
     "typescript": "^5"
   },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "prisma",
-      "@prisma/engines"
-    ]
-  },
   "packageManager": "pnpm@11.20.0"
 }

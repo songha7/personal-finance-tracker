@@ -11,6 +11,10 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
+    // Sign the user straight in after signup — no separate login step.
+    // This is actually the default already, but spelled out explicitly
+    // so it doesn't silently change if a future version flips it.
+    autoSignIn: true,
   },
   // nextCookies() makes cookie-setting work correctly when auth actions are
   // called from Server Actions later. Must be the last plugin in the array.

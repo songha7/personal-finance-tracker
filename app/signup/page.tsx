@@ -32,7 +32,13 @@ const SignupPage = () => {
       return;
     }
 
+    // Better Auth already signed the user in as part of sign-up (the new
+    // session cookie is set). `router.refresh()` throws away any cached,
+    // signed-out version of the destination page's server-rendered data,
+    // so it re-fetches with the new session instead of briefly looking
+    // like you're still logged out.
     router.push("/");
+    router.refresh();
   };
 
   return (
