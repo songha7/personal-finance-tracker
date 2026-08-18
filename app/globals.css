@@ -3,6 +3,63 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* ---------------------------------------------------------------------
+   * Design tokens
+   * ---------------------------------------------------------------------
+   * Two families of color live here, and they're kept deliberately
+   * separate:
+   *
+   *  1. "Brand" tokens (--brand-*, --page-*, --surface-*, --ink-*) are UI
+   *     chrome — the sidebar gradient, cards, buttons, body text. They're
+   *     picked to match this app's look, not validated for anything.
+   *
+   *  2. "Data" tokens (--data-*) are the fixed, ordered categorical
+   *     palette used by actual charts (the donut on the dashboard, chart
+   *     series in general). This exact 8-color order was validated with
+   *     the project's chart-accessibility tooling for colorblind-safe
+   *     separation between adjacent slots — don't reorder or recolor
+   *     individual slots without re-running that check.
+   * --------------------------------------------------------------------- */
+
+  /* Brand — vivid violet, used for the sidebar, primary buttons, and
+     active/selected states across the app. */
+  --brand-500: #7c5cff;
+  --brand-600: #6d4aff;
+  --brand-700: #5433d1;
+  --brand-gradient: linear-gradient(180deg, #6d4aff 0%, #4b2fcf 100%);
+
+  /* Page plane vs. card surface — the light lavender backdrop the white
+     cards sit on, matching the reference dashboard's layered look. */
+  --page-bg: #eee9fb;
+  --surface-card: #ffffff;
+  --surface-muted: #f6f4fe;
+
+  /* Text ink, in three weights of emphasis. */
+  --ink-primary: #171123;
+  --ink-secondary: #58516b;
+  --ink-muted: #8c86a0;
+
+  /* Chart chrome (gridlines, axis) — recessive by design so data reads
+     first. */
+  --chart-grid: #e5e1f3;
+  --chart-axis: #c9c3de;
+
+  /* Data — fixed categorical order (see comment above). Only the first
+     three slots are used together on any one chart (see dashboard donut),
+     per the validated "fold past three into Other" rule. */
+  --data-blue: #2a78d6;
+  --data-orange: #eb6834;
+  --data-aqua: #1baf7a;
+  --data-yellow: #eda100;
+  --data-magenta: #e87ba4;
+  --data-green: #008300;
+  --data-violet: #4a3aa7;
+  --data-red: #e34948;
+
+  /* Status — reserved meanings, never reused as a generic series color. */
+  --status-good: #0ca30c;
+  --status-critical: #d03b3b;
 }
 
 @theme inline {
@@ -17,6 +74,29 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+
+    --page-bg: #0d0d0d;
+    --surface-card: #17131f;
+    --surface-muted: #1c1826;
+
+    --ink-primary: #f4f2fb;
+    --ink-secondary: #c3bdd6;
+    --ink-muted: #8c86a0;
+
+    --chart-grid: #2c2a38;
+    --chart-axis: #3b3849;
+
+    /* Dark-surface steps of the same 8 data hues — see the comment on the
+       light values above; this is the same validated order, not a
+       separate palette. */
+    --data-blue: #3987e5;
+    --data-orange: #d95926;
+    --data-aqua: #199e70;
+    --data-yellow: #c98500;
+    --data-magenta: #d55181;
+    --data-green: #008300;
+    --data-violet: #9085e9;
+    --data-red: #e66767;
   }
 }
 

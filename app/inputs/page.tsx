@@ -2,13 +2,22 @@
 
 import { useState, type SubmitEvent } from "react";
 import { useRouter } from "next/navigation";
-import { mockCategoryBudgets } from "@/lib/mock-data";
+import { useCategoryBudgets } from "@/lib/hooks";
 
 const Inputs = () => {
   const router = useRouter();
 
+  // Categories used to come from a hardcoded mockCategoryBudgets array.
+  // Now they're per-user rows in the category_budget table, fetched
+  // through the same shared hook the Budgets and Topbar components use.
+  const { data: categoryBudgets } = useCategoryBudgets();
+
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState(mockCategoryBudgets[0].category);
+  // "" means "no explicit choice yet" — falls back to the first fetched
+  // category below. Derived at render time rather than synced via a
+  // separate effect, so there's no extra render just to catch up.
+  const [category, setCategory] = useState("");
+  const selectedCategory = category || categoryBudgets[0]?.category || "";
   const [type, setType] = useState<"income" | "expense">("expense");
   const [amount, setAmount] = useState("");
   // Defaults to today, but is now a real editable field like every other
@@ -24,7 +33,7 @@ const Inputs = () => {
     const parsedAmount = Number(amount);
     const isValid =
       description.trim() &&
-      category.trim() &&
+      selectedCategory.trim() &&
       date.trim() &&
       Number.isFinite(parsedAmount) &&
       parsedAmount > 0;
@@ -38,7 +47,7 @@ const Inputs = () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         description,
-        category,
+        category: selectedCategory,
         type,
         amount: parsedAmount,
         date,
@@ -61,27 +70,29 @@ const Inputs = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-start justify-center bg-amber-200 p-6">
+    <div className="flex min-h-full items-start justify-center bg-(--surface-muted) p-6">
       <form
         onSubmit={handleSubmit}
-        className="flex w-full max-w-sm flex-col gap-3 rounded-xl bg-white p-6 shadow"
+        className="flex w-full max-w-sm flex-col gap-3 rounded-2xl border border-(--chart-grid) bg-(--surface-card) p-6 shadow-sm"
       >
-        <h1 className="mb-2 text-2xl font-display">Add transaction</h1>
+        <h1 className="mb-2 text-2xl font-semibold text-(--ink-primary)">
+          Add transaction
+        </h1>
 
         <input
           type="text"
           placeholder="Description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="rounded-md border border-zinc-300 px-3 py-2 text-sm"
+          className="rounded-md border border-(--chart-grid) px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-(--brand-500)"
         />
 
         <select
-          value={category}
+          value={selectedCategory}
           onChange={(e) => setCategory(e.target.value)}
-          className="rounded-md border border-zinc-300 px-3 py-2 text-sm"
+          className="rounded-md border border-(--chart-grid) px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-(--brand-500)"
         >
-          {mockCategoryBudgets.map(({ category: name }) => (
+          {categoryBudgets.map(({ category: name }) => (
             <option key={name} value={name}>
               {name}
             </option>
@@ -93,41 +104,43 @@ const Inputs = () => {
           placeholder="Amount"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
-          className="rounded-md border border-zinc-300 px-3 py-2 text-sm"
+          className="rounded-md border border-(--chart-grid) px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-(--brand-500)"
         />
 
         <input
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
-          className="rounded-md border border-zinc-300 px-3 py-2 text-sm"
+          className="rounded-md border border-(--chart-grid) px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-(--brand-500)"
         />
 
         <div className="flex gap-4 text-sm">
-          <label className="flex items-center gap-1">
+          <label className="flex items-center gap-1.5">
             <input
               type="radio"
               checked={type === "expense"}
               onChange={() => setType("expense")}
+              className="accent-(--brand-600)"
             />
             Expense
           </label>
-          <label className="flex items-center gap-1">
+          <label className="flex items-center gap-1.5">
             <input
               type="radio"
               checked={type === "income"}
               onChange={() => setType("income")}
+              className="accent-(--brand-600)"
             />
             Income
           </label>
         </div>
 
-        {error && <p className="text-sm text-red-500">{error}</p>}
+        {error && <p className="text-sm text-(--status-critical)">{error}</p>}
 
         <button
           type="submit"
           disabled={isSubmitting}
-          className="mt-2 rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
+          className="mt-2 rounded-md bg-(--brand-600) px-3 py-2 text-sm font-medium text-white hover:bg-(--brand-700) disabled:opacity-50"
         >
           {isSubmitting ? "Saving..." : "Save transaction"}
         </button>

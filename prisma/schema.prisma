@@ -25,17 +25,34 @@ model Transaction {
   @@index([userId])
 }
 
+// One row per category per user, e.g. (userId=abc, category="Motor", limit=100).
+// Replaces the old hardcoded mockCategoryBudgets list so each user can have
+// their own budget limits, persisted in the database instead of shared code.
+model CategoryBudget {
+  id       String @id @default(cuid())
+  category String
+  limit    Float
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // A user can only have one budget row per category — enforced at the
+  // database level so "upsert this user's Motor budget" is unambiguous.
+  @@unique([userId, category])
+  @@index([userId])
+}
+
 model User {
-  id            String    @id
-  name          String
-  email         String
-  emailVerified Boolean   @default(false)
-  image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  sessions      Session[]
-  accounts      Account[]
-  transactions  Transaction[]
+  id              String           @id
+  name            String
+  email           String
+  emailVerified   Boolean          @default(false)
+  image           String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  sessions        Session[]
+  accounts        Account[]
+  transactions    Transaction[]
+  categoryBudgets CategoryBudget[]
 
   @@unique([email])
   @@map("user")
